@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Plan Daniel</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2E7D32">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Plan Daniel">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    :root {
+      --primary: #2E7D32;
+      --primary-light: #43A047;
+      --primary-pale: #E8F5E9;
+      --primary-mid: #C8E6C9;
+      --accent: #FF8F00;
+      --accent-pale: #FFF8E1;
+      --bg: #F4F7F4;
+      --card: #FFFFFF;
+      --text: #1A1A1A;
+      --text-muted: #757575;
+      --border: #E0E8E0;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --nav-h: 60px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--bg); color: var(--text);
+      max-width: 430px; margin: 0 auto; min-height: 100vh;
+      overflow-x: hidden; -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── HEADER ── */
+    #app-header {
+      position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 430px; z-index: 100;
+      background: var(--primary); color: white;
+      padding: calc(var(--safe-top) + 14px) 20px 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    #app-header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+    #app-header .header-sub { font-size: 12px; opacity: 0.85; }
+    .header-right { text-align: right; }
+    .day-pill {
+      display: inline-block; background: rgba(255,255,255,0.25);
+      border-radius: 20px; padding: 3px 12px; font-size: 13px; font-weight: 600;
+    }
+
+    /* ── MAIN ── */
+    #main-content {
+      padding-top: calc(var(--safe-top) + 68px);
+      padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 12px);
+      min-height: 100vh;
+    }
+
+    /* ── BOTTOM NAV ── */
+    #bottom-nav {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 430px;
+      height: calc(var(--nav-h) + var(--safe-bottom));
+      background: white; border-top: 1px solid var(--border);
+      display: flex; align-items: flex-start; padding-top: 8px;
+      z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
+    }
+    .nav-btn {
+      flex: 1; background: none; border: none;
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      cursor: pointer; padding: 6px 4px; color: var(--text-muted); transition: color 0.15s;
+    }
+    .nav-btn.active { color: var(--primary); }
+    .nav-btn .nav-icon { font-size: 22px; line-height: 1; }
+    .nav-btn .nav-label { font-size: 11px; font-weight: 500; }
+    .nav-btn.active .nav-label { font-weight: 700; }
+
+    /* ── CARDS ── */
+    .card { background: var(--card); border-radius: 16px; margin: 12px 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+
+    /* ── HOY TAB ── */
+    .greeting-card {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white; border-radius: 20px; margin: 12px 16px; padding: 22px 20px;
+      box-shadow: 0 4px 16px rgba(46,125,50,0.35);
+    }
+    .greeting-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .greeting-card p { font-size: 14px; opacity: 0.9; }
+    .progress-bar-wrap { margin-top: 16px; background: rgba(255,255,255,0.25); border-radius: 8px; height: 8px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: white; border-radius: 8px; transition: width 0.5s ease; }
+    .progress-label { margin-top: 6px; font-size: 12px; opacity: 0.85; text-align: right; }
+
+    .meal-list { padding: 4px 0 8px; }
+    .meal-row {
+      display: flex; align-items: flex-start; padding: 11px 16px; gap: 12px;
+      border-bottom: 1px solid var(--border); cursor: pointer;
+      transition: background 0.15s; position: relative;
+    }
+    .meal-row:last-child { border-bottom: none; }
+    .meal-row:active { background: var(--primary-pale); }
+    .meal-row.has-recipe::after {
+      content: '›'; position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+      color: var(--primary); font-size: 18px; font-weight: 300;
+    }
+    .meal-icon { font-size: 22px; min-width: 32px; text-align: center; margin-top: 1px; }
+    .meal-info { flex: 1; padding-right: 12px; }
+    .meal-type { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--primary); margin-bottom: 3px; }
+    .meal-name { font-size: 14px; line-height: 1.4; color: var(--text); }
+    .recipe-hint { font-size: 11px; color: var(--primary); margin-top: 3px; font-weight: 500; }
+
+    /* ── PLAN TAB ── */
+    .plan-day-card { background: var(--card); border-radius: 16px; margin: 10px 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); cursor: pointer; }
+    .plan-day-card.today .day-header { background: var(--primary); color: white; }
+    .plan-day-card.past .day-header { opacity: 0.6; }
+    .day-header { padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; background: var(--primary-pale); transition: background 0.2s; }
+    .day-header-left { display: flex; align-items: center; gap: 10px; }
+    .day-num { font-size: 17px; font-weight: 800; color: var(--primary); }
+    .plan-day-card.today .day-num { color: white; }
+    .day-name { font-size: 14px; font-weight: 600; }
+    .plan-day-card.today .day-name { color: white; }
+    .today-badge { font-size: 11px; background: var(--accent); color: white; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+    .day-arrow { font-size: 14px; color: var(--text-muted); transition: transform 0.2s; }
+    .plan-day-card.today .day-arrow { color: rgba(255,255,255,0.7); }
+    .plan-day-card.open .day-arrow { transform: rotate(90deg); }
+    .day-meals { display: none; padding: 4px 0 8px; }
+    .plan-day-card.open .day-meals { display: block; }
+
+    /* ── COMPRAS TAB ── */
+    .shopping-top { background: var(--primary-pale); padding: 14px 16px 0; }
+    .shopping-top h2 { font-size: 18px; font-weight: 700; color: var(--primary); }
+    .shopping-top p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .shopping-progress { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+    .shopping-prog-bar { flex: 1; height: 6px; background: var(--primary-mid); border-radius: 4px; overflow: hidden; }
+    .shopping-prog-fill { height: 100%; background: var(--primary); border-radius: 4px; transition: width 0.3s; }
+    .shopping-prog-text { font-size: 12px; font-weight: 700; color: var(--primary); white-space: nowrap; }
+
+    /* Filter tabs */
+    .filter-tabs { display: flex; gap: 0; padding: 10px 16px 12px; background: var(--primary-pale); }
+    .filter-tab {
+      flex: 1; padding: 7px 4px; background: white; border: 1.5px solid var(--primary-mid);
+      font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-tab:first-child { border-radius: 10px 0 0 10px; }
+    .filter-tab:last-child { border-radius: 0 10px 10px 0; }
+    .filter-tab:not(:first-child) { border-left: none; }
+    .filter-tab.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+    .category-block { background: var(--card); border-radius: 16px; margin: 8px 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .category-header { padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+    .category-name { font-size: 15px; font-weight: 700; }
+    .category-count { font-size: 12px; color: var(--text-muted); background: var(--bg); padding: 2px 8px; border-radius: 10px; }
+    .category-items { display: none; }
+    .category-block.open .category-items { display: block; }
+
+    .shopping-item {
+      display: flex; align-items: center; padding: 11px 16px; gap: 12px;
+      border-top: 1px solid var(--border); cursor: pointer; user-select: none; transition: background 0.15s;
+    }
+    .shopping-item:active { background: var(--bg); }
+    .shopping-item.checked { opacity: 0.45; }
+    .item-checkbox {
+      width: 22px; height: 22px; min-width: 22px; border-radius: 6px;
+      border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+    }
+    .shopping-item.checked .item-checkbox { background: var(--primary); border-color: var(--primary); }
+    .shopping-item.checked .item-checkbox::after { content: '✓'; display: block; font-size: 13px; font-weight: 700; color: white; }
+    .item-text { font-size: 14px; line-height: 1.4; flex: 1; }
+    .shopping-item.checked .item-text { text-decoration: line-through; }
+    .item-star { font-size: 11px; color: var(--accent); font-weight: 700; background: var(--accent-pale); padding: 1px 6px; border-radius: 8px; white-space: nowrap; }
+
+    .reset-btn { display: block; width: calc(100% - 32px); margin: 16px; padding: 14px; background: #FFEBEE; color: #C62828; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; }
+
+    /* ── AJUSTES TAB ── */
+    .settings-section { background: var(--card); border-radius: 16px; margin: 12px 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .settings-row { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .settings-row:last-child { border-bottom: none; }
+    .settings-label { font-size: 15px; font-weight: 500; }
+    .settings-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .settings-row input[type="date"] { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 14px; color: var(--primary); font-weight: 600; background: var(--primary-pale); }
+    .section-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); padding: 16px 16px 4px; }
+    .notif-section { background: var(--card); border-radius: 16px; margin: 12px 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .notif-row { padding: 13px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .notif-row:last-child { border-bottom: none; }
+    .notif-label { font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .notif-row input[type="time"] { border: 1px solid var(--border); border-radius: 8px; padding: 5px 8px; font-size: 14px; }
+    .app-info { text-align: center; padding: 24px 16px; color: var(--text-muted); font-size: 13px; }
+    .app-info strong { color: var(--primary); font-size: 15px; display: block; margin-bottom: 4px; }
+
+    /* ── RECIPE SHEET ── */
+    #recipe-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      z-index: 300; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+    }
+    #recipe-overlay.open { opacity: 1; pointer-events: all; }
+    #recipe-sheet {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%);
+      width: 100%; max-width: 430px; z-index: 301;
+      background: white; border-radius: 24px 24px 0 0;
+      max-height: 88vh; display: flex; flex-direction: column;
+      transition: transform 0.35s cubic-bezier(0.34, 1.2, 0.64, 1);
+      box-shadow: 0 -4px 32px rgba(0,0,0,0.18);
+    }
+    #recipe-sheet.open { transform: translateX(-50%) translateY(0); }
+    .sheet-handle { width: 40px; height: 4px; background: #DDD; border-radius: 2px; margin: 12px auto 0; flex-shrink: 0; }
+    .sheet-header {
+      padding: 16px 20px 14px; display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 12px; flex-shrink: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .sheet-title-wrap { flex: 1; }
+    .sheet-meal-type { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--primary); margin-bottom: 4px; }
+    .sheet-title { font-size: 18px; font-weight: 800; line-height: 1.3; color: var(--text); }
+    .sheet-raciones { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .sheet-close {
+      width: 30px; height: 30px; min-width: 30px; border-radius: 50%;
+      background: var(--bg); border: none; font-size: 18px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; color: var(--text-muted);
+    }
+    .sheet-body { overflow-y: auto; padding: 0 20px calc(var(--safe-bottom) + 20px); -webkit-overflow-scrolling: touch; }
+    .recipe-section-title {
+      font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--primary); margin: 18px 0 10px;
+    }
+    .ingredients-list { list-style: none; }
+    .ingredients-list li {
+      padding: 8px 0; border-bottom: 1px solid var(--border);
+      font-size: 14px; line-height: 1.4; display: flex; gap: 10px; align-items: flex-start;
+    }
+    .ingredients-list li:last-child { border-bottom: none; }
+    .ingredients-list li::before { content: '•'; color: var(--primary); font-size: 16px; line-height: 1.3; flex-shrink: 0; }
+    .prep-text { font-size: 14px; line-height: 1.65; color: var(--text); }
+    .no-recipe-msg { text-align: center; padding: 32px 16px; color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+    .no-recipe-msg .nr-emoji { font-size: 40px; margin-bottom: 12px; }
+
+    /* ── ONBOARDING ── */
+    #onboarding { position: fixed; inset: 0; background: var(--primary); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 200; padding: 32px 28px; color: white; }
+    #onboarding .logo { font-size: 64px; margin-bottom: 20px; }
+    #onboarding h1 { font-size: 28px; font-weight: 800; text-align: center; margin-bottom: 8px; }
+    #onboarding p { font-size: 15px; opacity: 0.85; text-align: center; margin-bottom: 36px; line-height: 1.5; }
+    #onboarding label { font-size: 14px; font-weight: 600; opacity: 0.9; margin-bottom: 8px; display: block; text-align: center; }
+    #onboarding input[type="date"] { width: 100%; padding: 14px; border-radius: 12px; border: none; font-size: 16px; font-weight: 600; color: var(--primary); margin-bottom: 24px; text-align: center; }
+    #onboarding button { width: 100%; padding: 16px; background: white; color: var(--primary); border: none; border-radius: 14px; font-size: 17px; font-weight: 700; cursor: pointer; }
+
+    /* ── SPECIAL STATES ── */
+    .done-card { background: linear-gradient(135deg, #FF8F00, #F4511E); color: white; border-radius: 20px; margin: 12px 16px; padding: 28px 20px; text-align: center; box-shadow: 0 4px 16px rgba(255,143,0,0.35); }
+    .done-card .done-emoji { font-size: 48px; margin-bottom: 12px; }
+    .done-card h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+    .done-card p { font-size: 14px; opacity: 0.9; line-height: 1.5; }
+    .waiting-card { background: linear-gradient(135deg, #1565C0, #1E88E5); color: white; border-radius: 20px; margin: 12px 16px; padding: 28px 20px; text-align: center; box-shadow: 0 4px 16px rgba(21,101,192,0.35); }
+    .waiting-card .wait-emoji { font-size: 48px; margin-bottom: 12px; }
+    .waiting-card h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+    .waiting-card p { font-size: 14px; opacity: 0.9; line-height: 1.5; }
+
+    /* ── UTIL ── */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    #toast { position: fixed; bottom: calc(var(--nav-h) + var(--safe-bottom) + 16px); left: 50%; transform: translateX(-50%) translateY(20px); background: #333; color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 150; white-space: nowrap; }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- ONBOARDING -->
+<div id="onboarding" style="display:none;">
+  <div class="logo">🥗</div>
+  <h1>Plan Daniel</h1>
+  <p>Tu detox de 10 días personalizado. Primero dime: ¿cuándo empieza tu plan?</p>
+  <label for="ob-date">Fecha de inicio</label>
+  <input type="date" id="ob-date">
+  <button onclick="finishOnboarding()">¡Empezar!</button>
+</div>
+
+<!-- HEADER -->
+<header id="app-header">
+  <div>
+    <h1>🥗 Plan Daniel</h1>
+    <div class="header-sub">Detox 10 días</div>
+  </div>
+  <div class="header-right">
+    <div class="day-pill" id="header-day-pill">—</div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<div id="main-content">
+  <div id="tab-hoy" class="tab-content active"><div id="hoy-content"></div></div>
+  <div id="tab-plan" class="tab-content">
+    <div class="section-label">Los 10 días de tu plan</div>
+    <div id="plan-content"></div>
+  </div>
+  <div id="tab-compras" class="tab-content">
+    <div class="shopping-top">
+      <h2>🛒 Lista de Compras</h2>
+      <p>★ = comprar de nuevo para los días 6–10</p>
+      <div class="shopping-progress">
+        <div class="shopping-prog-bar"><div class="shopping-prog-fill" id="shop-prog-fill"></div></div>
+        <div class="shopping-prog-text" id="shop-prog-text">0 / 0</div>
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab active" id="ft-all" onclick="setShopFilter('all')">Todos</button>
+        <button class="filter-tab" id="ft-1-5" onclick="setShopFilter('1-5')">Días 1–5</button>
+        <button class="filter-tab" id="ft-6-10" onclick="setShopFilter('6-10')">Días 6–10</button>
+      </div>
+    </div>
+    <div id="compras-content"></div>
+    <button class="reset-btn" onclick="resetShopping()">🔄 Reiniciar lista de compras</button>
+  </div>
+  <div id="tab-ajustes" class="tab-content">
+    <div class="section-label">Plan</div>
+    <div class="settings-section">
+      <div class="settings-row">
+        <div><div class="settings-label">Fecha de inicio</div><div class="settings-sub">El Día 1 del plan</div></div>
+        <input type="date" id="start-date-input" onchange="updateStartDate(this.value)">
+      </div>
+    </div>
+    <div class="section-label">Recordatorios de comidas</div>
+    <div class="notif-section">
+      <div class="notif-row"><div class="notif-label"><span>🌅</span> Desayuno</div><input type="time" id="t-desayuno" value="08:00" onchange="saveNotifTimes()"></div>
+      <div class="notif-row"><div class="notif-label"><span>🍎</span> Aperitivo</div><input type="time" id="t-aperitivo" value="10:30" onchange="saveNotifTimes()"></div>
+      <div class="notif-row"><div class="notif-label"><span>🥗</span> Almuerzo</div><input type="time" id="t-almuerzo" value="13:00" onchange="saveNotifTimes()"></div>
+      <div class="notif-row"><div class="notif-label"><span>🫐</span> Merienda</div><input type="time" id="t-merienda" value="16:00" onchange="saveNotifTimes()"></div>
+      <div class="notif-row"><div class="notif-label"><span>🍽️</span> Cena</div><input type="time" id="t-cena" value="19:30" onchange="saveNotifTimes()"></div>
+      <div class="notif-row" style="background:#f9f9f9;"><div style="font-size:13px;color:var(--text-muted);line-height:1.5;">Para recibir notificaciones, agrega la app a tu pantalla de inicio y activa los permisos.</div></div>
+    </div>
+    <div class="section-label">Datos</div>
+    <div class="settings-section">
+      <div class="settings-row" style="cursor:pointer;" onclick="resetAll()">
+        <div><div class="settings-label" style="color:#C62828;">Restablecer todo</div><div class="settings-sub">Borra progreso y configuración</div></div>
+        <span style="color:#C62828;font-size:18px;">›</span>
+      </div>
+    </div>
+    <div class="app-info"><strong>Plan Daniel — Detox 10 Días</strong>Basado en el programa de detoxificación<br>del Dr. Mark Hyman</div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav id="bottom-nav">
+  <button class="nav-btn active" id="nav-hoy" onclick="showTab('hoy')"><span class="nav-icon">🌅</span><span class="nav-label">Hoy</span></button>
+  <button class="nav-btn" id="nav-plan" onclick="showTab('plan')"><span class="nav-icon">📅</span><span class="nav-label">Plan</span></button>
+  <button class="nav-btn" id="nav-compras" onclick="showTab('compras')"><span class="nav-icon">🛒</span><span class="nav-label">Compras</span></button>
+  <button class="nav-btn" id="nav-ajustes" onclick="showTab('ajustes')"><span class="nav-icon">⚙️</span><span class="nav-label">Ajustes</span></button>
+</nav>
+
+<!-- RECIPE SHEET -->
+<div id="recipe-overlay" onclick="closeRecipe()"></div>
+<div id="recipe-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title-wrap">
+      <div class="sheet-meal-type" id="sheet-meal-type"></div>
+      <div class="sheet-title" id="sheet-title"></div>
+      <div class="sheet-raciones" id="sheet-raciones"></div>
+    </div>
+    <button class="sheet-close" onclick="closeRecipe()">✕</button>
+  </div>
+  <div class="sheet-body" id="sheet-body"></div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────
+//  DATA: PLAN
+// ─────────────────────────────────────────────
+const MEAL_ICONS  = { desayuno:'🌅', aperitivo:'🍎', almuerzo:'🥗', merienda:'🫐', cena:'🍽️' };
+const MEAL_LABELS = { desayuno:'Desayuno', aperitivo:'Aperitivo', almuerzo:'Almuerzo', merienda:'Merienda', cena:'Cena' };
+
+const PLAN = {
+  1:  { desayuno:'Batido proteico completo del doctor Hyman', aperitivo:'Palitos de verdura crudos (apio, zanahoria, pepino y jícama) y ½ t. de humus de alcachofas', almuerzo:'½ t. de quinoa con zanahorias y brócoli al vapor, y aliño para ensalada antioxidante', merienda:'Cóctel de verduras', cena:'Revuelto thai con arroz al coco' },
+  2:  { desayuno:'Omelette de 2 huevos con verduras y aguacate', aperitivo:'½ t. de bayas surtidas más 25 almendras tostadas a la canela', almuerzo:'3 rollos de pavo (2 lonchas de pechuga de pavo bajo en sal y sin nitratos, lechuga romana y ½ t. de humus de alcachofas)', merienda:'2 cuch. de garbanzos crujientes con 2 huevos cocidos', cena:'Guisado de ternera con verduras' },
+  3:  { desayuno:'1 t. de quinoa cocida con ½ t. de leche de almendras sin endulzar y canela', aperitivo:'Licuado de arándanos, espinacas y linaza', almuerzo:'Sopa de frijoles negros del doctor Hyman', merienda:'1 t. de edamame orgánico al vapor en la vaina', cena:'Salmón al grill con conserva agridulce de cilantro y menta, con quinoa al limón y aceite de oliva' },
+  4:  { desayuno:'Desayuno de arroz integral con leche de coco y chía', aperitivo:'2 cuch. de garbanzos crujientes con 2 huevos cocidos', almuerzo:'Hamburguesas de pavo y tomate seco del doctor Hyman', merienda:'½ t. de bayas surtidas más 25 almendras tostadas a la canela', cena:'Pollo al pesto con nueces del doctor Hyman con frijoles blancos, pimiento picado y vinagre balsámico' },
+  5:  { desayuno:'Desayuno de horneado de quinoa', aperitivo:'Cóctel de verduras', almuerzo:'Ensalada de col rizada cruda del doctor Hyman', merienda:'Palitos de verdura crudos (apio, zanahoria, pepino y jícama) y 1/3 t. de humus de alcachofas', cena:'Curry de camarones con guisantes y castañas de agua' },
+  6:  { desayuno:'2 huevos revueltos con espinacas, aguacate y tomate', aperitivo:'Licuado de arándanos, espinacas y linaza', almuerzo:'Sopa de frijoles negros del doctor Hyman', merienda:'Salsa de frijoles blancos al ajo con brócoli y coliflor', cena:'Revuelto thai con arroz al coco' },
+  7:  { desayuno:'Batido proteico completo del doctor Hyman', aperitivo:'Salsa cremosa de zanahorias con verduras al vapor', almuerzo:'Ensalada de col rizada del doctor Hyman', merienda:'4 cuch. de garbanzos crujientes', cena:'Pescado al grill con ensalada picante de col cruda' },
+  8:  { desayuno:'Desayuno de horneado de quinoa', aperitivo:'1 t. de edamame orgánico al vapor con salsa de soja o tamari', almuerzo:'3 rollos de pavo (2 lonchas de pechuga de pavo bajo en sal y sin nitratos, lechuga romana y humus de alcachofas)', merienda:'Batido proteico completo del doctor Hyman', cena:'Kofta de cordero con puré de coliflor' },
+  9:  { desayuno:'Licuado de arándanos, espinacas y linaza', aperitivo:'Salsa de frijoles blancos al ajo con brócoli y zanahorias', almuerzo:'Ensalada de pescado a las hierbas con ensalada verde', merienda:'2 huevos cocidos con sal, pimienta, chile en polvo y ajo en polvo', cena:'Bol de pollo primavera y judías verdes al vapor' },
+  10: { desayuno:'2 huevos cocidos con 2 lonchas de pavo sin nitratos y ¼ de aguacate', aperitivo:'½ t. de bayas surtidas con 25 almendras tostadas a la canela', almuerzo:'Omelette de brócoli asado con ensalada verde y aliño para ensaladas antioxidante', merienda:'Salsa cremosa de zanahorias con verduras al vapor', cena:'Bacalao asado estilo griego con espárragos asados y quinoa al limón y aceite de oliva' }
+};
+
+// Mapping: dayNumber_mealKey → recipeId (null = no recipe card)
+const PLAN_RECIPES = {
+  '1_desayuno':'batido-proteico-hyman', '1_aperitivo':'humus-alcachofas', '1_almuerzo':'alino-antioxidante', '1_merienda':'coctel-verduras', '1_cena':'revuelto-thai',
+  '2_aperitivo':'almendras-canela', '2_almuerzo':'humus-alcachofas', '2_merienda':'garbanzos-crujientes', '2_cena':'guisado-ternera',
+  '3_aperitivo':'licuado-arandanos', '3_almuerzo':'sopa-frijoles-negros', '3_cena':'salmon-agridulce',
+  '4_desayuno':'arroz-integral-coco', '4_aperitivo':'garbanzos-crujientes', '4_almuerzo':'hamburguesas-pavo', '4_merienda':'almendras-canela', '4_cena':'pollo-pesto-nueces',
+  '5_desayuno':'horneado-quinoa', '5_aperitivo':'coctel-verduras', '5_almuerzo':'ensalada-col-rizada', '5_merienda':'humus-alcachofas', '5_cena':'curry-camarones',
+  '6_aperitivo':'licuado-arandanos', '6_almuerzo':'sopa-frijoles-negros', '6_merienda':'salsa-frijoles-blancos', '6_cena':'revuelto-thai',
+  '7_desayuno':'batido-proteico-hyman', '7_aperitivo':'salsa-cremosa-zanahoria', '7_almuerzo':'ensalada-col-rizada', '7_merienda':'garbanzos-crujientes', '7_cena':'pescado-grill-col',
+  '8_desayuno':'horneado-quinoa', '8_merienda':'batido-proteico-hyman', '8_cena':'kofta-cordero',
+  '9_desayuno':'licuado-arandanos', '9_aperitivo':'salsa-frijoles-blancos', '9_almuerzo':'ensalada-pescado-hierbas', '9_cena':'bol-pollo-primavera',
+  '10_aperitivo':'almendras-canela', '10_almuerzo':'omelette-brocoli', '10_merienda':'salsa-cremosa-zanahoria', '10_cena':'bacalao-griego'
+};
+
+// ─────────────────────────────────────────────
+//  DATA: RECIPES
+// ─────────────────────────────────────────────
+const RECIPES = {
+  'alino-antioxidante': {
+    name: 'Aliño Antioxidante para Ensaladas',
+    raciones: '3–4 Raciones',
+    ingredientes: ['¼ de taza de vinagre de sidra de manzana sin filtrar','2 cucharadas de aceite de oliva virgen extra, de semillas de uva o de coco','1 diente de ajo machacado','2 cucharadas de jugo de limón, más 1 cucharadita de ralladura de limón','1 cucharadita de semilla de linaza molida','1 cucharadita de mostaza seca','½ cucharadita de orégano','Pimienta negra molida y sal al gusto'],
+    preparacion: 'Batir enérgicamente el vinagre junto con el aceite hasta que estén bien mezclados (o puedes ponerlos en un recipiente cerrado y agitar vigorosamente). Añadir los ingredientes restantes y batir juntos hasta que estén bien ligados. Puedes variar este aliño a tu gusto añadiendo otras hierbas aromáticas o especias como albahaca, eneldo, estragón y romero.'
+  },
+  'humus-alcachofas': {
+    name: 'Humus de Alcachofas',
+    raciones: '8 Raciones (½ taza cada una)',
+    ingredientes: ['1 lata (425 gr.) de garbanzos','1 taza de corazones de alcachofas escurridos y troceados','2 dientes de ajo frescos machacados','2 cucharadas de jugo de limón','1 cucharada de aceite de oliva','2 cucharadas de agua','1 cucharada de tahíni','Pimienta negra molida y sal al gusto'],
+    preparacion: 'Combinar todos los ingredientes en la batidora hasta obtener una consistencia suave. Colocar en un recipiente. Enfriar y servir con palitos de verdura variados como apio, jícama y zanahorias.'
+  },
+  'coctel-verduras': {
+    name: 'Cóctel de Verduras',
+    raciones: '1 Ración',
+    ingredientes: ['2 tazas de espinacas frescas','½ remolacha pequeña cruda','5 tallos de apio limpios','½ limón pelado','1 trozo de raíz de jengibre de 1–2 cm pelada','2 dientes de ajo pelados'],
+    preparacion: 'En una licuadora, introducir las espinacas, la remolacha, el apio, el limón, el jengibre y el ajo. Batir el jugo y servir en un vaso. Consumir a temperatura ambiente o frío.'
+  },
+  'revuelto-thai': {
+    name: 'Revuelto Thai con Arroz al Coco',
+    raciones: '3 Raciones',
+    ingredientes: ['350 gr. (12 onzas) de tempe orgánico','1 cebolla pequeña picada','3 dientes de ajo machacados','1 taza de zanahorias a cuadritos','1 taza de pimiento rojo a cuadritos','1 taza de calabacín a cuadritos','1 cucharadita de aceite de oliva virgen extra','2 cucharadas de salsa de soja baja en sodio','1 cucharadita de pimienta negra molida','1 taza de arroz jasmín integral o arroz negro','1 taza de leche de coco sin endulzar + 1 taza de agua'],
+    preparacion: 'Cortar a cuadritos todas las verduras. Cortar el tempe y cocinarlo en una plancha a temperatura media hasta que esté dorado. Añadir las verduras y la salsa de soja. Sofreír hasta que las verduras estén tiernas, alrededor de 5 minutos. Para el arroz: cocer en la mezcla de leche de coco y agua hasta que todo el líquido se haya absorbido, unos 20 minutos.'
+  },
+  'almendras-canela': {
+    name: 'Almendras Tostadas a la Canela',
+    raciones: '4 Raciones',
+    ingredientes: ['1 taza de almendras enteras crudas','1 cucharadita de canela molida','Espray de cocinar de aceite de oliva virgen extra'],
+    preparacion: 'Precalentar el horno a 350°F (180°C). En una bandeja de hornear con borde, extender las almendras en una sola capa y rociar con el spray de aceite. Espolvorear con la canela y hornear durante 8–10 minutos o hasta que consigan un buen aroma. Disfrutar tibias.'
+  },
+  'garbanzos-crujientes': {
+    name: 'Garbanzos Crujientes',
+    raciones: '12 Raciones (30 gr. cada una)',
+    ingredientes: ['4 tazas de garbanzos escurridos y enjuagados','2 cucharadas de aceite de oliva virgen extra','2 cucharadas de comino molido','1 cucharadita de chile en polvo','½ cucharadita de pimienta cayena'],
+    preparacion: 'Precalentar el horno a 400°F (200°C) y situar una rejilla a la mitad. Poner los garbanzos en un recipiente grande y mezclar con los ingredientes restantes hasta que todo esté cubierto. Extender en una capa uniforme en una bandeja de horno con borde y hornear hasta que estén crujientes, entre 30 y 40 minutos.'
+  },
+  'guisado-ternera': {
+    name: 'Guisado de Ternera con Verduras',
+    raciones: '4–6 Raciones',
+    ingredientes: ['2 kilos (4 libras) de carne de ternera cortada en dados de 5 cm','½ taza de almidón de maíz o maicena','2 cucharadas de aceite de semilla de uva','1 cebolla roja grande picada','4 tazas de caldo de carne bajo en sal','1 lata (175 gr.) de pasta de tomate','2 tazas de patatas rojas troceadas','1 taza de zanahorias troceadas','1 taza de apio troceado','2 cucharadas de pimienta negra molida','1 cucharada de sal'],
+    preparacion: 'En un plato, extender una capa fina de maicena. Rebosar los trozos de carne hasta que estén ligeramente cubiertos. En una sartén grande, calentar el aceite. Dorar la carne con las cebollas durante 6–8 minutos. Añadir la pasta de tomate y el caldo y remover hasta que esté bien ligado. Cambiar la mezcla a una olla de cocción lenta con las verduras. Cubrir y cocinar a baja temperatura durante 8 horas o a alta temperatura durante 4 horas.'
+  },
+  'licuado-arandanos': {
+    name: 'Licuado de Arándanos, Espinacas y Linaza',
+    raciones: '2 Raciones',
+    ingredientes: ['2 tazas de leche de almendras o coco sin endulzar','2 cucharadas de semillas de linaza molidas','1 cacito de proteína en polvo sin endulzar','1 taza de espinacas','½ taza de arándanos frescos o congelados','½ taza de hielo picado'],
+    preparacion: 'Batir los primeros cinco ingredientes en la batidora/licuadora. Añadir el hielo y batir hasta que esté suave.'
+  },
+  'sopa-frijoles-negros': {
+    name: 'Sopa de Frijoles Negros del Doctor Hyman',
+    raciones: '5–7 Raciones',
+    ingredientes: ['1 cucharada de aceite de oliva virgen extra','1 cucharada de comino','1 cebolla pequeña picada','2 latas (425 gr.) de frijoles negros','2 tazas de caldo vegetal','1 hoja de laurel','1½ cucharadas de tamari sin trigo','1 cucharada de jugo de limón','Cilantro fresco picado para guarnición'],
+    preparacion: 'Calentar el aceite de oliva a fuego medio. Añadir el ajo y la cebolla y cocinar hasta que estén transparentes. Añadir el comino y saltear unos minutos más. Añadir los frijoles incluido el líquido, el caldo y la hoja de laurel. Llevar a ebullición. Reducir el calor y hervir a baja temperatura durante 10–15 minutos. Añadir el tamari y el jugo de limón y hervir 1 minuto más.'
+  },
+  'salmon-agridulce': {
+    name: 'Salmón al Grill con Conserva Agridulce de Cilantro y Menta',
+    raciones: '4 Raciones',
+    ingredientes: ['750 gr. de salmón salvaje','1 cucharada de aceite de oliva virgen extra','Pizca de sal','— Conserva —','1 ramilletes pequeño de cilantro lavado (con tallos)','2 cucharadas de hojas de menta fresca picadas','3 cucharadas de aceite de oliva virgen extra','1½ cucharadas de ajo picado','Pizca de sal','1 cucharada de jugo fresco de limón o lima','1 pizca de copos de pimienta roja (opcional)'],
+    preparacion: 'Sazonar el salmón con aceite de oliva, sal y pimienta. Dejar reposar 10 minutos. Mezclar todos los ingredientes de la conserva por separado. Precalentar la plancha o el grill. Colocar el pescado con la piel hacia abajo y cocinar hasta que esté ligeramente tostado, aproximadamente 15 minutos según el grosor. Dar la vuelta y cocinar unos minutos más hasta que esté completamente hecho. Untar la conserva agridulce encima del salmón. Servir con rodajas de limón o lima.'
+  },
+  'arroz-integral-coco': {
+    name: 'Desayuno de Arroz Integral con Leche de Coco y Chía',
+    raciones: '3–4 Raciones',
+    ingredientes: ['1 taza de arroz integral cocido','50 gr. (2 onzas) de semillas de chía secas','2 tazas de leche de coco','2 cucharadas de copos de coco'],
+    preparacion: 'Mezclar los ingredientes en un recipiente y refrigerar al menos durante 1 hora. Disfrutarlo caliente o frío.'
+  },
+  'hamburguesas-pavo': {
+    name: 'Hamburguesas de Pavo y Tomate Seco del Doctor Hyman',
+    raciones: '4 Raciones',
+    ingredientes: ['500 gr. de carne orgánica de pavo molida','1 cucharadita de aceite de oliva virgen extra','1 cucharada de vinagre balsámico','2–3 cucharadas de albahaca fresca picada','1 cucharada de ajo picado','1½ cucharaditas de mostaza Dijon','Pizca de sal','Pimienta negra'],
+    preparacion: 'Cubrir los tomates secos con agua y remojar hasta que estén tiernos. Escurrir y cortar en trozos pequeños. Mezclar con los ingredientes restantes y formar 4 hamburguesas. Cocinar a la plancha o al grill a temperatura media hasta que estén listas, alrededor de 8 minutos. Servir sobre una ensalada grande.'
+  },
+  'pollo-pesto-nueces': {
+    name: 'Pollo al Pesto con Nueces del Doctor Hyman',
+    raciones: '4 Raciones',
+    ingredientes: ['500 gr. de pollo sin piel y sin hueso','Pizca de sal','1 cucharada de aceite de semilla de uva','2–3 cucharadas de albahaca fresca picada','1 cucharada de ajo picado','1½ cucharaditas de mostaza Dijon','Pimienta negra','¼ de taza de nueces crudas'],
+    preparacion: 'Cortar el pollo en finas láminas y salar. Calentar el aceite en una sartén grande antiadherente. Añadir el pollo y cocinar por cada lado. Moler los ingredientes restantes para hacer el pesto con una batidora de mano hasta alcanzar la consistencia deseada. Combinar el pollo con la salsa pesto. Servir caliente o a temperatura ambiente.'
+  },
+  'horneado-quinoa': {
+    name: 'Desayuno de Horneado de Quinoa',
+    raciones: '6 Raciones',
+    ingredientes: ['1½ tazas de quinoa roja o blanca enjuagada','2 huevos','½ taza de leche de coco o almendra sin endulzar','1 cucharadita de extracto de vainilla','2 cucharadas de crema de almendra','1 cucharadita de canela','1 cucharadita de extracto de stevia'],
+    preparacion: 'Llevar 3 tazas de agua a ebullición. Añadir ½ cucharadita de sal y la quinoa. Hervir hasta que el agua se absorba. Enfriar en frigorífico. Precalentar el horno a 375°F (190°C). Engrasar una bandeja de 20×20 cm. Batir los huevos con la leche, el extracto de vainilla y la canela. Añadir la quinoa y mezclar bien. Verter en la bandeja. Hornear 20–25 minutos hasta que esté firme y dorado. Enfriar y cortar en cuadrados.'
+  },
+  'ensalada-col-rizada': {
+    name: 'Ensalada de Col Rizada Cruda del Doctor Hyman',
+    raciones: '4 Raciones',
+    ingredientes: ['1 col rizada grande sin tallo y picada finamente','Ralladura y jugo de un limón grande','¼ de taza de aceite de oliva virgen extra','1 diente de ajo picado','¼ de cucharadita de sal','¼ de taza de piñones tostados','¼ de taza de pasas de Corinto','½ taza de olivas Kalamata sin hueso picadas'],
+    preparacion: 'Poner la col en un bol y añadir la ralladura y el jugo de limón, el aceite de oliva, el ajo y la sal. Remover con las manos durante 1–2 minutos para ablandar la col. Añadir los ingredientes restantes y mezclar bien. Dejar reposar 15 minutos antes de servir. Está mejor el mismo día aunque puede refrigerarse.'
+  },
+  'curry-camarones': {
+    name: 'Curry de Camarones con Guisantes y Castañas de Agua',
+    raciones: '4 Raciones',
+    ingredientes: ['2 cucharadas de aceite de coco','2 cucharadas de curry en polvo','1 kilo (2 libras) de camarones salvajes pelados y sin cabeza','500 gr. (1 libra) de guisantes dulces','1 lata de leche de coco sin endulzar','El jugo de 2 limas','Pizca de sal marina','2 cucharadas de almidón de maíz o maicena'],
+    preparacion: 'En una cazuela grande o wok, calentar el aceite de coco a fuego alto, añadir el curry en polvo y cocinar hasta que suelte su aroma, 1 minuto. Añadir los camarones y los guisantes dulces y cocinar 5 minutos. Añadir la leche de coco, el jugo de lima y la sal. Mezclar el almidón de maíz con un poco de agua fría y añadir para espesar la salsa. Servir sobre arroz integral.'
+  },
+  'salsa-frijoles-blancos': {
+    name: 'Salsa de Frijoles Blancos al Ajo',
+    raciones: '6 Raciones (50 gr. cada una)',
+    ingredientes: ['1 lata (425 gr.) de frijoles blancos escurridos y enjuagados','1 cucharada de aceite de oliva virgen extra','2 cucharadas de comino molido','4 dientes de ajo pequeños machacados','Jugo de 1 limón','1 cucharadita de pimentón'],
+    preparacion: 'En la batidora, triturar los frijoles con el aceite de oliva y agua hasta que esté cremoso. Añadir el ajo machacado, el jugo de limón y el pimentón y batir hasta conseguir una textura cremosa. Servir con tus verduras crudas favoritas.'
+  },
+  'salsa-cremosa-zanahoria': {
+    name: 'Salsa Cremosa de Zanahoria',
+    raciones: '4 Raciones',
+    ingredientes: ['1 taza de zanahorias troceadas','2 dientes de ajo machacados','El jugo de 2 limones','3 cucharadas de aceite de oliva virgen extra','Pizca de sal','½ cucharadita de pimienta cayena'],
+    preparacion: 'Cocer al vapor las zanahorias hasta que estén tiernas. Triturar en la batidora. Añadir los otros ingredientes y batir hasta que esté suave. Servir con aperitivos integrales horneados o con trozos de brócoli y coliflor. Ajustar la cantidad de sal y cayena al gusto.'
+  },
+  'pescado-grill-col': {
+    name: 'Pescado al Grill con Ensalada Picante de Col Cruda',
+    raciones: '3 Raciones',
+    ingredientes: ['500 gr. de filete de halibut o pescado blanco salvaje','1 cucharada de aceite de oliva virgen extra','2 tazas de col verde o morada en tiras finas','1 taza de zanahoria rallada','2 cucharadas de crema de almendra','2 cucharadas de vinagre de arroz','Pizca de sal y pimienta','Jugo de 1 lima'],
+    preparacion: 'Untar con una brocha el pescado con el aceite de oliva y sazonar con sal y pimienta. Cocinar al grill en una plancha hasta que esté hecho, aproximadamente 8 minutos por cada lado. En un recipiente aparte, mezclar la crema de almendra, el vinagre, la sal, el jugo de lima y la cayena. Combinar la col y la zanahoria y mezclar. Servir el pescado encima de la ensalada de col picante.'
+  },
+  'kofta-cordero': {
+    name: 'Kofta de Cordero Mediterráneo al Grill + Puré de Coliflor',
+    raciones: '3–4 Raciones',
+    ingredientes: ['— Kofta —','3 dientes de ajo machacados','2 cucharadas de cebolla rayada','¼ taza de perejil fresco picado','1 cucharadita de sal, pimienta negra, pimienta de Jamaica, pimentón, cilantro','500 gr. de carne de cordero molida','— Puré de Coliflor —','1 coliflor mediana limpia y troceada','2 cucharadas de aceite de oliva virgen extra','Sal y pimienta negra'],
+    preparacion: 'Kofta: precalentar el grill a temperatura media. Combinar el ajo, las especias y el cordero, trabajando con las manos hasta mezclar bien. Dar forma de salchicha alrededor de brochetas (sumergidas en agua 30 min. antes). Cocinar en el grill 7–8 minutos dando vuelta. | Puré: hervir la coliflor 10 minutos hasta que esté muy tierna. Escurrir, reservando ¼ taza del agua. Aplastar con un tenedor, añadir el aceite y sazonar.'
+  },
+  'batido-proteico-hyman': {
+    name: 'Batido Proteico Completo del Doctor Hyman',
+    raciones: '3 Raciones',
+    ingredientes: ['1 taza de arándanos congelados','2 cucharadas de crema de almendras','2 cucharadas de semillas de calabaza','2 cucharadas de semillas de chía','2 cucharadas de semillas de cáñamo','4 nueces','3 nueces de Brasil','1 plátano grande','1 cucharada de aceite de coco virgen extra','½ taza de leche de almendras sin endulzar','1 taza de agua'],
+    preparacion: 'Mezclar todos los ingredientes en la batidora. Batir a alta velocidad hasta que esté cremoso y suave. Si está demasiado espeso, añadir más agua hasta lograr una consistencia cremosa pero bebible. Servir muy frío.'
+  },
+  'ensalada-pescado-hierbas': {
+    name: 'Ensalada de Pescado a las Hierbas',
+    raciones: '2 Raciones',
+    ingredientes: ['225 gr. de pescado enlatado (salmón o atún libre de mercurio)','2 cucharadas de eneldo fresco','1 cucharadita de ajo en polvo','1 cucharada de mayonesa orgánica o vegana','Pizca de sal y pimienta','2 tallos de apio finamente cortados en cuadritos'],
+    preparacion: 'Combinar todos los ingredientes en un bol de ensalada y servir frío.'
+  },
+  'bol-pollo-primavera': {
+    name: 'Bol de Pollo Primavera',
+    raciones: '4 Raciones',
+    ingredientes: ['4 cucharaditas de aceite de coco','¼ de cebolla roja grande troceada','500 gr. de pechuga de pollo sin hueso en trozos de 2 cm','1 pimiento rojo mediano troceado','1 taza grande de tomates cherry partidos a la mitad','½ taza de zanahoria rallada','½ taza de perejil picado','1 cucharadita de pimienta negra molida','2 cucharadas de jugo de limón'],
+    preparacion: 'En una sartén grande, cocinar las cebollas en el aceite de coco a fuego mediano hasta que estén transparentes, 5 minutos. Añadir el pollo y cocinarlo hasta que esté bien hecho, 8–10 minutos. Añadir el pimiento, los tomates y la zanahoria y cocinar 5 minutos más. Añadir el perejil, la pimienta y el jugo de limón y mezclar. Servir frío o caliente.'
+  },
+  'omelette-brocoli': {
+    name: 'Omelette de Brócoli Asado',
+    raciones: '3 Raciones',
+    ingredientes: ['6 huevos grandes','1 cebolla roja mediana en cuadritos','1 diente de ajo machacado','1 cucharada de perejil fresco picado','2 tazas de brócoli troceado','Pizca de sal','¼ cucharadita de pimienta negra molida','1 cucharadita de aceite de oliva virgen extra','3 cucharadas de queso parmesano'],
+    preparacion: 'Calentar el horno a 350°F (180°C). Calentar el aceite en una sartén antiadherente. Saltear la cebolla, el ajo y el brócoli hasta que el brócoli esté verde claro, 3 min. Sazonar. Batir los huevos, incorporar la mezcla de brócoli. Engrasar una fuente de horno de 2 litros. Verter la mezcla. Espolvorear el queso parmesano. Hornear 25–30 minutos hasta que esté firme.'
+  },
+  'bacalao-griego': {
+    name: 'Bacalao Asado Estilo Griego',
+    raciones: '3 Raciones',
+    ingredientes: ['500 gr. de bacalao o pescado blanco firme','2 dientes de ajo machacados','½ taza de cebolla roja picada finamente','10 olivas Kalamata sin hueso','1 cucharadita de aceite de oliva virgen extra','1 cucharadita de sal','1 cucharadita de pimienta negra molida','1 cucharada de orégano fresco (o 1 cucharadita seco)','El jugo de 1 limón'],
+    preparacion: 'Picar la cebolla, el ajo, el orégano y las olivas. En un recipiente, mezclar el aceite de oliva, la sal, la pimienta y todos los ingredientes del marinado. Marinar el pescado 30 minutos a 1 hora. Precalentar el horno a 350°F (180°C). Hornear 20–30 minutos hasta que el pescado se separe en láminas fácilmente.'
+  }
+};
+
+// ─────────────────────────────────────────────
+//  DATA: SHOPPING
+// ─────────────────────────────────────────────
+const SHOPPING = [
+  { id:'huerta', name:'🥦 Huerta', items:[
+    {id:'h1',text:'1 plátano',star:true},{id:'h2',text:'4 limones',star:true},{id:'h3',text:'1 envase de arándanos frescos o congelados',star:true},{id:'h4',text:'1 lima',star:true},{id:'h5',text:'2 aguacates',star:true},{id:'h6',text:'1 jícama'},{id:'h7',text:'2 bolsas (225–250 g) de espinacas baby',star:true},{id:'h8',text:'1 paquete de berza o col rizada'},{id:'h9',text:'1 lechuga romana',star:true},{id:'h10',text:'1 paquete de uvas o tomates cherry',star:true},{id:'h11',text:'1 remolacha pequeña'},{id:'h12',text:'1 raíz de jengibre pequeña'},{id:'h13',text:'2 pepinos'},{id:'h14',text:'1 calabacín'},{id:'h15',text:'1 manojo de espárragos'},{id:'h16',text:'1 ramilletes de brócoli',star:true},{id:'h17',text:'1 col verde o morada',star:true},{id:'h18',text:'1 coliflor',star:true},{id:'h19',text:'1 bolsa de zanahorias',star:true},{id:'h20',text:'1 bolsa de apio'},{id:'h21',text:'500 g de guisantes dulces'},{id:'h22',text:'1 taza de guisantes o judías verdes',star:true},{id:'h23',text:'2 pimientos rojos',star:true},{id:'h24',text:'1 ramilletes de perejil'},{id:'h25',text:'1 ramilletes de albahaca fresca',star:true},{id:'h26',text:'1 ramilletes de cilantro'},{id:'h27',text:'1 ramilletes de menta fresca'},{id:'h28',text:'1 cebolla roja',star:true},{id:'h29',text:'1 cebolla mediana'},{id:'h30',text:'1 cabeza de ajo',star:true},{id:'h31',text:'3 tazas de judías verdes frescas',star:true},{id:'h32',text:'2 patatas rojas/dulces medianas ó 1 ñame'}
+  ]},
+  { id:'carne', name:'🥩 Carne y Pescado', items:[
+    {id:'c1',text:'500 g de carne magra de pavo o ternera'},{id:'c2',text:'1½–2 kg de filetes de ternera'},{id:'c3',text:'½ kg de carne de cordero molida',star:true},{id:'c4',text:'½ kg de salmón salvaje'},{id:'c5',text:'750 g de camarón salvaje'},{id:'c6',text:'500 g de pescado blanco',star:true},{id:'c7',text:'500 g de chuletas o pechugas de pollo',star:true},{id:'c8',text:'225 g de pechuga de pavo libre de nitratos',star:true}
+  ]},
+  { id:'huevos', name:'🥚 Huevos', items:[{id:'e1',text:'1 docena de huevos de corral u orgánicos',star:true}]},
+  { id:'cereales', name:'🌾 Cereales y Legumbres', items:[{id:'ce1',text:'1 paquete de quinoa'},{id:'ce2',text:'1 paquete de arroz negro o integral (Jasmine)'}]},
+  { id:'congelados', name:'❄️ Congelados', items:[{id:'co1',text:'1 paquete de bayas surtidas congeladas'},{id:'co2',text:'1 paquete de edamame orgánico congelado'}]},
+  { id:'latas', name:'🥫 Latas y Tarros', items:[
+    {id:'l1',text:'2 latas de 425 g de frijol negro'},{id:'l2',text:'1 lata de 425 g de frijol blanco',star:true},{id:'l3',text:'1 lata/paquete de caldo vegetal bajo en sal'},{id:'l4',text:'1 lata/paquete de caldo de carne bajo en sal'},{id:'l5',text:'1 tarro/paquete de tomates secos'},{id:'l6',text:'1 tarro de olivas negras o Kalamata'},{id:'l7',text:'1 lata de castañas de agua'},{id:'l8',text:'1 lata de alcachofas en agua'},{id:'l9',text:'2 latas de garbanzos'},{id:'l10',text:'1 lata pequeña de pasta de tomate'}
+  ]},
+  { id:'condimentos', name:'🫙 Condimentos y Salsas', items:[
+    {id:'k1',text:'1 envase de aceite de coco o semilla de uva'},{id:'k2',text:'1 botella de aceite de oliva virgen extra'},{id:'k3',text:'1 frasco de vinagre balsámico'},{id:'k4',text:'1 botella de salsa de soja sin gluten o tamari'},{id:'k5',text:'1 frasco de pasta de sésamo o tahíni'},{id:'k6',text:'1 botella de vinagre de sidra de manzana sin filtrar'},{id:'k7',text:'1 frasco de mostaza Dijon'},{id:'k8',text:'1 botella pequeña de vinagre de arroz'}
+  ]},
+  { id:'frutossecos', name:'🌰 Frutos Secos y Semillas', items:[
+    {id:'f1',text:'1 paquete de semilla de linaza molida'},{id:'f2',text:'1 envase de leche de coco sin endulzar',star:true},{id:'f3',text:'1 envase de leche de almendra sin endulzar'},{id:'f4',text:'1 bolsa de almendras crudas'},{id:'f5',text:'1 bolsa de nueces crudas'},{id:'f6',text:'1 bolsa de coco rayado sin endulzar'},{id:'f7',text:'1 paquete de semillas de chía'},{id:'f8',text:'1 tarro de crema de almendras'},{id:'f9',text:'1 paquete pequeño de piñones'},{id:'f10',text:'1 paquete de semillas de calabaza'},{id:'f11',text:'1 paquete pequeño de nueces de Brasil'}
+  ]},
+  { id:'misc', name:'📦 Misceláneos', items:[
+    {id:'m1',text:'1 envase de proteína en polvo de alta calidad'},{id:'m2',text:'1 paquete de tempé orgánico',star:true},{id:'m3',text:'Almidón de maíz o maicena'},{id:'m4',text:'Pasas de Corinto'}
+  ]},
+  { id:'especias', name:'🧂 Especias y Hierbas', items:[
+    {id:'s1',text:'Mostaza seca'},{id:'s2',text:'Orégano seco'},{id:'s3',text:'Pimienta cayena'},{id:'s4',text:'Comino'},{id:'s5',text:'Cebolla en polvo'},{id:'s6',text:'Ajo en polvo'},{id:'s7',text:'Chile en polvo'},{id:'s8',text:'Extracto de vainilla'},{id:'s9',text:'Sal marina o kosher'},{id:'s10',text:'Pimienta negra'},{id:'s11',text:'Canela'},{id:'s12',text:'Hojas de laurel'},{id:'s13',text:'Pimentón'}
+  ]}
+];
+
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+let state = { startDate: null, checked: {}, shopFilter: 'all', notifTimes: { desayuno:'08:00', aperitivo:'10:30', almuerzo:'13:00', merienda:'16:00', cena:'19:30' } };
+
+function loadState() { try { const s = localStorage.getItem('planDaniel'); if (s) state = {...state, ...JSON.parse(s)}; } catch(e){} }
+function saveState() { try { localStorage.setItem('planDaniel', JSON.stringify(state)); } catch(e){} }
+
+// ─────────────────────────────────────────────
+//  DATE HELPERS
+// ─────────────────────────────────────────────
+function getCurrentDay() {
+  if (!state.startDate) return null;
+  const start = new Date(state.startDate + 'T00:00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+  return Math.floor((today - start) / 86400000) + 1;
+}
+function getGreeting() {
+  const h = new Date().getHours();
+  return h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches';
+}
+
+// ─────────────────────────────────────────────
+//  RENDER: HOY
+// ─────────────────────────────────────────────
+function renderHoy() {
+  const day = getCurrentDay();
+  const container = document.getElementById('hoy-content');
+  if (!day) { container.innerHTML = ''; return; }
+  if (day < 1) {
+    const d = Math.abs(day - 1);
+    container.innerHTML = `<div class="waiting-card"><div class="wait-emoji">📅</div><h2>¡Ya casi!</h2><p>Tu plan comienza en <strong>${d} día${d!==1?'s':''}</strong>.<br>Aprovecha para hacer tus compras y prepararte.</p></div>`;
+    return;
+  }
+  if (day > 10) {
+    container.innerHTML = `<div class="done-card"><div class="done-emoji">🏆</div><h2>¡Lo lograste!</h2><p>Completaste los 10 días del Plan Daniel. ¿Quieres repetirlo? Actualiza la fecha de inicio en Ajustes.</p></div>`;
+    return;
+  }
+  const meals = PLAN[day];
+  const pct = Math.round((day / 10) * 100);
+  let mealRows = '';
+  for (const [key, label] of Object.entries(MEAL_LABELS)) {
+    const recipeId = PLAN_RECIPES[`${day}_${key}`];
+    const hasRecipe = !!recipeId;
+    mealRows += `<div class="meal-row ${hasRecipe ? 'has-recipe' : ''}" ${hasRecipe ? `onclick="openRecipe('${recipeId}','${label}')"` : ''}>
+      <div class="meal-icon">${MEAL_ICONS[key]}</div>
+      <div class="meal-info">
+        <div class="meal-type">${label}</div>
+        <div class="meal-name">${meals[key]}</div>
+        ${hasRecipe ? '<div class="recipe-hint">Ver receta</div>' : ''}
+      </div></div>`;
+  }
+  container.innerHTML = `
+    <div class="greeting-card">
+      <h2>${getGreeting()}, Daniel 👋</h2>
+      <p>Hoy es tu <strong>Día ${day}</strong> de 10</p>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+      <div class="progress-label">${pct}% completado · ${10-day} días restantes</div>
+    </div>
+    <div class="card">
+      <div style="padding:14px 16px 4px;font-size:15px;font-weight:700;">Tus comidas de hoy</div>
+      <div class="meal-list">${mealRows}</div>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────
+//  RENDER: PLAN
+// ─────────────────────────────────────────────
+function renderPlan() {
+  const currentDay = getCurrentDay();
+  let html = '';
+  for (let d = 1; d <= 10; d++) {
+    const isToday = d === currentDay;
+    const isPast  = currentDay && d < currentDay;
+    const cls = ['plan-day-card', isToday?'today':'', isPast?'past':''].join(' ').trim();
+    const meals = PLAN[d];
+    let mealRows = '';
+    for (const [key, label] of Object.entries(MEAL_LABELS)) {
+      const recipeId = PLAN_RECIPES[`${d}_${key}`];
+      const hasRecipe = !!recipeId;
+      mealRows += `<div class="meal-row ${hasRecipe?'has-recipe':''}" ${hasRecipe?`onclick="openRecipe('${recipeId}','${label}')"`:''}><div class="meal-icon">${MEAL_ICONS[key]}</div><div class="meal-info"><div class="meal-type">${label}</div><div class="meal-name">${meals[key]}</div>${hasRecipe?'<div class="recipe-hint">Ver receta</div>':''}</div></div>`;
+    }
+    html += `<div class="${cls}" id="day-card-${d}">
+      <div class="day-header" onclick="toggleDay(${d})">
+        <div class="day-header-left"><div class="day-num">Día ${d}</div>${isToday?'<span class="today-badge">Hoy</span>':''}${isPast?'<span style="font-size:16px;">✅</span>':''}</div>
+        <div class="day-arrow">›</div>
+      </div>
+      <div class="day-meals"><div class="meal-list">${mealRows}</div></div>
+    </div>`;
+  }
+  document.getElementById('plan-content').innerHTML = html;
+  if (currentDay && currentDay >= 1 && currentDay <= 10) {
+    const c = document.getElementById(`day-card-${currentDay}`);
+    if (c) c.classList.add('open');
+  }
+}
+function toggleDay(d) { document.getElementById(`day-card-${d}`).classList.toggle('open'); }
+
+// ─────────────────────────────────────────────
+//  RENDER: COMPRAS
+// ─────────────────────────────────────────────
+let shopFilter = 'all';
+function setShopFilter(f) {
+  shopFilter = f;
+  state.shopFilter = f;
+  saveState();
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('ft-' + (f==='all'?'all':f)).classList.add('active');
+  renderCompras();
+}
+
+function renderCompras() {
+  let total = 0, checked = 0, html = '';
+  for (const cat of SHOPPING) {
+    const visibleItems = cat.items.filter(item => {
+      if (shopFilter === '1-5') return true; // all items needed for days 1-5
+      if (shopFilter === '6-10') return item.star === true; // only ★ items needed again
+      return true; // 'all'
+    });
+    if (visibleItems.length === 0) continue;
+    const catChecked = visibleItems.filter(i => state.checked[i.id]).length;
+    total   += visibleItems.length;
+    checked += catChecked;
+    let itemsHtml = '';
+    for (const item of visibleItems) {
+      const isChecked = !!state.checked[item.id];
+      itemsHtml += `<div class="shopping-item ${isChecked?'checked':''}" onclick="toggleItem('${item.id}')">
+        <div class="item-checkbox"></div>
+        <div class="item-text">${item.text}</div>
+        ${item.star ? '<div class="item-star">★ ×2</div>' : ''}
+      </div>`;
+    }
+    html += `<div class="category-block" id="cat-${cat.id}">
+      <div class="category-header" onclick="toggleCategory('${cat.id}')">
+        <div class="category-name">${cat.name}</div>
+        <div style="display:flex;align-items:center;gap:8px;"><div class="category-count">${catChecked}/${visibleItems.length}</div><div class="day-arrow">›</div></div>
+      </div>
+      <div class="category-items">${itemsHtml}</div>
+    </div>`;
+  }
+  document.getElementById('compras-content').innerHTML = html;
+  const pct = total > 0 ? Math.round((checked/total)*100) : 0;
+  document.getElementById('shop-prog-fill').style.width = pct + '%';
+  document.getElementById('shop-prog-text').textContent = `${checked} / ${total}`;
+}
+function toggleCategory(id) { document.getElementById('cat-'+id).classList.toggle('open'); }
+function toggleItem(id) { state.checked[id] = !state.checked[id]; saveState(); renderCompras(); }
+function resetShopping() {
+  if (!confirm('¿Reiniciar toda la lista de compras?')) return;
+  state.checked = {}; saveState(); renderCompras(); showToast('Lista reiniciada');
+}
+
+// ─────────────────────────────────────────────
+//  RENDER: AJUSTES
+// ─────────────────────────────────────────────
+function renderAjustes() {
+  if (state.startDate) document.getElementById('start-date-input').value = state.startDate;
+  const t = state.notifTimes;
+  document.getElementById('t-desayuno').value  = t.desayuno;
+  document.getElementById('t-aperitivo').value = t.aperitivo;
+  document.getElementById('t-almuerzo').value  = t.almuerzo;
+  document.getElementById('t-merienda').value  = t.merienda;
+  document.getElementById('t-cena').value      = t.cena;
+}
+function updateStartDate(val) { state.startDate = val; saveState(); renderHoy(); renderPlan(); updateHeader(); showToast('Fecha actualizada ✓'); }
+function updateHeader() {
+  const day = getCurrentDay(); const pill = document.getElementById('header-day-pill');
+  if (day && day >= 1 && day <= 10) pill.textContent = `Día ${day} de 10`;
+  else if (day && day > 10) pill.textContent = '¡Completado! 🏆';
+  else pill.textContent = 'Plan Daniel';
+}
+function saveNotifTimes() {
+  state.notifTimes = { desayuno:document.getElementById('t-desayuno').value, aperitivo:document.getElementById('t-aperitivo').value, almuerzo:document.getElementById('t-almuerzo').value, merienda:document.getElementById('t-merienda').value, cena:document.getElementById('t-cena').value };
+  saveState(); requestNotifPermission(); showToast('Recordatorios guardados ✓');
+}
+function resetAll() {
+  if (!confirm('¿Borrar todos los datos y empezar de nuevo?')) return;
+  localStorage.removeItem('planDaniel'); location.reload();
+}
+
+// ─────────────────────────────────────────────
+//  RECIPE SHEET
+// ─────────────────────────────────────────────
+function openRecipe(recipeId, mealLabel) {
+  const recipe = RECIPES[recipeId];
+  if (!recipe) return;
+  document.getElementById('sheet-meal-type').textContent = mealLabel;
+  document.getElementById('sheet-title').textContent = recipe.name;
+  document.getElementById('sheet-raciones').textContent = recipe.raciones;
+  const ingrHtml = recipe.ingredientes.map(i => `<li>${i}</li>`).join('');
+  document.getElementById('sheet-body').innerHTML = `
+    <div class="recipe-section-title">Ingredientes</div>
+    <ul class="ingredients-list">${ingrHtml}</ul>
+    <div class="recipe-section-title">Preparación</div>
+    <p class="prep-text">${recipe.preparacion}</p>
+    <div style="height:24px;"></div>`;
+  document.getElementById('recipe-overlay').classList.add('open');
+  document.getElementById('recipe-sheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeRecipe() {
+  document.getElementById('recipe-overlay').classList.remove('open');
+  document.getElementById('recipe-sheet').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ─────────────────────────────────────────────
+//  TABS
+// ─────────────────────────────────────────────
+function showTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('nav-' + tab).classList.add('active');
+  if (tab === 'hoy')     renderHoy();
+  if (tab === 'plan')    renderPlan();
+  if (tab === 'compras') renderCompras();
+  if (tab === 'ajustes') renderAjustes();
+}
+
+// ─────────────────────────────────────────────
+//  NOTIFICATIONS
+// ─────────────────────────────────────────────
+function requestNotifPermission() { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); }
+function scheduleNotifCheck() {
+  setInterval(() => {
+    if (!state.startDate) return;
+    const day = getCurrentDay();
+    if (!day || day < 1 || day > 10 || Notification.permission !== 'granted') return;
+    const now = new Date();
+    const hhmm = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    for (const [key, label] of Object.entries(MEAL_LABELS)) {
+      if (state.notifTimes[key] === hhmm) {
+        new Notification(`${MEAL_ICONS[key]} ${label} — Día ${day}`, { body: PLAN[day][key], icon: 'icon-192.png' });
+      }
+    }
+  }, 60000);
+}
+
+// ─────────────────────────────────────────────
+//  ONBOARDING
+// ─────────────────────────────────────────────
+function finishOnboarding() {
+  const val = document.getElementById('ob-date').value;
+  if (!val) { alert('Por favor selecciona una fecha de inicio.'); return; }
+  state.startDate = val; saveState();
+  document.getElementById('onboarding').style.display = 'none';
+  init();
+}
+
+// ─────────────────────────────────────────────
+//  TOAST
+// ─────────────────────────────────────────────
+let toastTimeout;
+function showToast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimeout); toastTimeout = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+function init() {
+  shopFilter = state.shopFilter || 'all';
+  renderHoy(); renderPlan(); renderCompras(); renderAjustes(); updateHeader();
+  scheduleNotifCheck();
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+// BOOT
+loadState();
+if (!state.startDate) {
+  document.getElementById('onboarding').style.display = 'flex';
+  document.getElementById('ob-date').value = new Date().toISOString().split('T')[0];
+} else {
+  init();
+}
+</script>
+</body>
+</html>
