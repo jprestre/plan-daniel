@@ -1057,7 +1057,7 @@ function renderPrep() {
     return `<button class="prep-preset ${act}" onclick="setPrepRange(${p.from},${p.to})">${p.label}</button>`;
   }).join('');
 
-  // Make-ahead rows
+  // Make-ahead rows: tap row → abre receta; tap checkbox → marca como hecho
   let makeAheadHtml = '';
   for (const rid of makeAhead) {
     const recipe = RECIPES[rid]; if (!recipe) continue;
@@ -1065,13 +1065,16 @@ function renderPrep() {
     const days  = recipeUsage[rid];
     const dlbl  = 'Día' + (days.length > 1 ? 's ' : ' ') + days.join(', ');
     const ck    = state.prepChecked?.[`r:${rid}`];
-    makeAheadHtml += `<div class="prep-recipe-row ${ck ? 'checked' : ''}" onclick="togglePrepCheck('r:${rid}')">
-      <div class="prep-recipe-check"></div>
+    makeAheadHtml += `<div class="prep-recipe-row ${ck ? 'checked' : ''}" onclick="openRecipe('${rid}','Preparación')">
+      <div class="prep-recipe-check" onclick="event.stopPropagation(); togglePrepCheck('r:${rid}')"></div>
       <div class="prep-recipe-info">
         <div class="prep-recipe-name">${recipe.name}</div>
         <div class="prep-recipe-days">${dlbl}</div>
         <div class="prep-recipe-storage">🧊 ${info.storage}</div>
-      </div></div>`;
+        <div class="recipe-hint" style="margin-top:3px;">Ver receta</div>
+      </div>
+      <div style="font-size:18px;color:var(--primary);align-self:center;padding-left:4px;flex-shrink:0;">›</div>
+    </div>`;
   }
 
   // Make-day notes
@@ -1089,7 +1092,7 @@ function renderPrep() {
       </div></div>`;
   }
 
-  // Ingredient categories
+  // Ingredientes a pre-procesar (recetas del mismo día)
   const sortedCats = Object.values(byCat).sort((a, b) => a.order - b.order);
   let catsHtml = '';
   for (const cat of sortedCats) {
@@ -1117,6 +1120,40 @@ function renderPrep() {
     </div>`;
   }
 
+  // ── Lista COMPLETA de ingredientes de TODAS las recetas del rango ──
+  const allByCat = {};
+  for (const rid of allRids) {
+    const recipe = RECIPES[rid]; if (!recipe) continue;
+    for (const ingr of recipe.ingredientes) {
+      const cat = getCatForIngr(ingr);
+      if (!allByCat[cat.id]) allByCat[cat.id] = { ...cat, items: [] };
+      allByCat[cat.id].items.push({ text: ingr, recipe: recipe.name });
+    }
+  }
+  const sortedAllCats = Object.values(allByCat).sort((a, b) => a.order - b.order);
+  let allCatsHtml = '';
+  for (const cat of sortedAllCats) {
+    const liItems = cat.items.map(i =>
+      `<li>${i.text} <span class="prep-ingr-context">(${i.recipe})</span></li>`
+    ).join('');
+    allCatsHtml += `<div class="prep-cat-block" id="allcat-${cat.id}">
+      <div class="prep-cat-header" onclick="toggleAllCat('${cat.id}')">
+        <div class="prep-cat-left">
+          <span class="prep-cat-icon">${cat.icon}</span>
+          <span class="prep-cat-label">${cat.label}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="prep-cat-count">${cat.items.length}</div>
+          <div class="day-arrow">›</div>
+        </div>
+      </div>
+      <div class="prep-cat-body">
+        <ul class="prep-ingr-list">${liItems}</ul>
+      </div>
+    </div>`;
+  }
+  const totalAllIngr = Object.values(allByCat).reduce((s, c) => s + c.items.length, 0);
+
   document.getElementById('prep-content').innerHTML = `
     <div class="section-label">Sesión de Preparación</div>
 
@@ -1131,13 +1168,13 @@ function renderPrep() {
         <input type="number" id="prep-to" min="1" max="10" value="${to}"
                onchange="setPrepRange(document.getElementById('prep-from').value, this.value)">
       </div>
-      <div class="prep-summary">Cubre <strong>${totalRecipes} recetas</strong> · ${makeAhead.length} para preparar completas · ${totalIngr} ingredientes a pre-procesar</div>
+      <div class="prep-summary">Cubre <strong>${totalRecipes} recetas</strong> · ${makeAhead.length} para preparar completas · ${totalAllIngr} ingredientes en total</div>
     </div>
 
     ${makeAheadHtml ? `
     <div class="prep-section-card">
       <div class="prep-section-title">✅ Prepara estas recetas completas hoy</div>
-      <div class="prep-section-sub">Hazlas ahora y guárdalas. Marca las que vayas terminando.</div>
+      <div class="prep-section-sub">Toca una receta para ver la preparación. Marca el círculo cuando la termines.</div>
       ${makeAheadHtml}
     </div>` : ''}
 
@@ -1153,6 +1190,13 @@ function renderPrep() {
       <div class="prep-section-title">🔪 Ingredientes a pre-procesar</div>
       <div class="prep-section-sub">Deja estos listos hoy para las recetas del mismo día.</div>
       ${catsHtml}
+    </div>` : ''}
+
+    ${allCatsHtml ? `
+    <div class="prep-section-card">
+      <div class="prep-section-title">🧾 Todo lo que necesitarás</div>
+      <div class="prep-section-sub">Lista completa de ingredientes de todas las recetas del período — para preparar, pre-procesar o tener a mano.</div>
+      ${allCatsHtml}
     </div>` : ''}
 
     <button class="prep-reset-btn" onclick="resetPrepChecks()">🔄 Reiniciar sesión de prep</button>
@@ -1177,6 +1221,10 @@ function togglePrepCheck(key) {
 
 function togglePrepCat(id) {
   const el = document.getElementById('prepcat-' + id);
+  if (el) el.classList.toggle('open');
+}
+function toggleAllCat(id) {
+  const el = document.getElementById('allcat-' + id);
   if (el) el.classList.toggle('open');
 }
 

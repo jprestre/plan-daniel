@@ -1,4 +1,4 @@
-const CACHE = 'plan-daniel-v3';
+const CACHE = 'plan-daniel-v4';
 const FILES = [
   './',
   './index.html',
