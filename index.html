@@ -5,24 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Plan Daniel</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#2E7D32">
+  <meta name="theme-color" content="#5C7A5C">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Plan Daniel">
   <link rel="apple-touch-icon" href="icon-192.png">
   <style>
     :root {
-      --primary: #2E7D32;
-      --primary-light: #43A047;
-      --primary-pale: #E8F5E9;
-      --primary-mid: #C8E6C9;
-      --accent: #FF8F00;
-      --accent-pale: #FFF8E1;
-      --bg: #F4F7F4;
+      --primary: #5C7A5C;
+      --primary-light: #8FAF8F;
+      --primary-pale: #EEF3EE;
+      --primary-mid: #C8D8C8;
+      --accent: #C4714A;
+      --accent-pale: #FAF0EB;
+      --bg: #F5F0E8;
       --card: #FFFFFF;
-      --text: #1A1A1A;
-      --text-muted: #757575;
-      --border: #E0E8E0;
+      --text: #2C1F14;
+      --text-muted: #7A6B5D;
+      --border: #E5DDD0;
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --nav-h: 60px;
@@ -85,7 +85,7 @@
     .greeting-card {
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
       color: white; border-radius: 20px; margin: 12px 16px; padding: 22px 20px;
-      box-shadow: 0 4px 16px rgba(46,125,50,0.35);
+      box-shadow: 0 4px 16px rgba(92,122,92,0.35);
     }
     .greeting-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
     .greeting-card p { font-size: 14px; opacity: 0.9; }
@@ -236,6 +236,19 @@
     .no-recipe-msg { text-align: center; padding: 32px 16px; color: var(--text-muted); font-size: 14px; line-height: 1.6; }
     .no-recipe-msg .nr-emoji { font-size: 40px; margin-bottom: 12px; }
 
+    /* ── INGREDIENTES DEL DÍA ── */
+    .ingr-section { padding: 0 16px 8px; border-bottom: 1px solid var(--border); }
+    .ingr-section:last-child { border-bottom: none; padding-bottom: 12px; }
+    .ingr-meal-header { display: flex; align-items: flex-start; gap: 10px; padding: 11px 0 6px; }
+    .ingr-meal-icon { font-size: 20px; min-width: 28px; text-align: center; line-height: 1.4; }
+    .ingr-meal-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--primary); margin-bottom: 2px; }
+    .ingr-recipe-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; }
+    .ingr-list { list-style: none; padding-left: 4px; margin: 0; }
+    .ingr-list li { font-size: 13px; line-height: 1.5; padding: 4px 0 4px 16px; color: var(--text); border-bottom: 1px solid var(--border); position: relative; }
+    .ingr-list li:last-child { border-bottom: none; }
+    .ingr-list li::before { content: '·'; color: var(--accent); font-size: 18px; font-weight: 700; position: absolute; left: 0; top: 2px; line-height: 1.4; }
+    .ingr-no-recipe { padding: 12px 16px; font-size: 13px; color: var(--text-muted); font-style: italic; }
+
     /* ── ONBOARDING ── */
     #onboarding { position: fixed; inset: 0; background: var(--primary); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 200; padding: 32px 28px; color: white; }
     #onboarding .logo { font-size: 64px; margin-bottom: 20px; }
@@ -246,7 +259,7 @@
     #onboarding button { width: 100%; padding: 16px; background: white; color: var(--primary); border: none; border-radius: 14px; font-size: 17px; font-weight: 700; cursor: pointer; }
 
     /* ── SPECIAL STATES ── */
-    .done-card { background: linear-gradient(135deg, #FF8F00, #F4511E); color: white; border-radius: 20px; margin: 12px 16px; padding: 28px 20px; text-align: center; box-shadow: 0 4px 16px rgba(255,143,0,0.35); }
+    .done-card { background: linear-gradient(135deg, #C4714A, #9E4B2E); color: white; border-radius: 20px; margin: 12px 16px; padding: 28px 20px; text-align: center; box-shadow: 0 4px 16px rgba(196,113,74,0.35); }
     .done-card .done-emoji { font-size: 48px; margin-bottom: 12px; }
     .done-card h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
     .done-card p { font-size: 14px; opacity: 0.9; line-height: 1.5; }
@@ -635,9 +648,26 @@ function renderHoy() {
         ${hasRecipe ? '<div class="recipe-hint">Ver receta</div>' : ''}
       </div></div>`;
   }
+  const ingrData = getIngredientesDelDia(day);
+  let ingrSections = '';
+  for (const item of ingrData) {
+    const liItems = item.ingredientes.map(i => `<li>${i}</li>`).join('');
+    ingrSections += `<div class="ingr-section">
+      <div class="ingr-meal-header">
+        <span class="ingr-meal-icon">${item.icon}</span>
+        <div>
+          <div class="ingr-meal-label">${item.meal}</div>
+          <div class="ingr-recipe-name">${item.recipeName}</div>
+        </div>
+      </div>
+      <ul class="ingr-list">${liItems}</ul>
+    </div>`;
+  }
+  if (!ingrSections) ingrSections = `<div class="ingr-no-recipe">No hay recetas con ingredientes para este día.</div>`;
+
   container.innerHTML = `
     <div class="greeting-card">
-      <h2>${getGreeting()}, Daniel 👋</h2>
+      <h2>${getGreeting()} 👋</h2>
       <p>Hoy es tu <strong>Día ${day}</strong> de 10</p>
       <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
       <div class="progress-label">${pct}% completado · ${10-day} días restantes</div>
@@ -645,6 +675,10 @@ function renderHoy() {
     <div class="card">
       <div style="padding:14px 16px 4px;font-size:15px;font-weight:700;">Tus comidas de hoy</div>
       <div class="meal-list">${mealRows}</div>
+    </div>
+    <div class="card">
+      <div style="padding:14px 16px 4px;font-size:15px;font-weight:700;">🧺 Ingredientes que necesitarás</div>
+      ${ingrSections}
     </div>`;
 }
 
@@ -840,6 +874,25 @@ let toastTimeout;
 function showToast(msg) {
   const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
   clearTimeout(toastTimeout); toastTimeout = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ─────────────────────────────────────────────
+//  INGREDIENTES DEL DÍA
+// ─────────────────────────────────────────────
+function getIngredientesDelDia(day) {
+  const result = [];
+  for (const [key, label] of Object.entries(MEAL_LABELS)) {
+    const recipeId = PLAN_RECIPES[`${day}_${key}`];
+    if (recipeId && RECIPES[recipeId]) {
+      result.push({
+        meal: label,
+        icon: MEAL_ICONS[key],
+        recipeName: RECIPES[recipeId].name,
+        ingredientes: RECIPES[recipeId].ingredientes
+      });
+    }
+  }
+  return result;
 }
 
 // ─────────────────────────────────────────────
