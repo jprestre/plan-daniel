@@ -236,6 +236,51 @@
     .no-recipe-msg { text-align: center; padding: 32px 16px; color: var(--text-muted); font-size: 14px; line-height: 1.6; }
     .no-recipe-msg .nr-emoji { font-size: 40px; margin-bottom: 12px; }
 
+    /* ── PREP TAB ── */
+    .prep-range-card { background: var(--card); border-radius: 16px; margin: 10px 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .prep-range-header { padding: 14px 16px 8px; font-size: 15px; font-weight: 700; }
+    .prep-presets { display: flex; gap: 8px; padding: 0 16px 12px; flex-wrap: wrap; }
+    .prep-preset { padding: 7px 14px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-muted); transition: all 0.15s; }
+    .prep-preset.active { background: var(--primary); border-color: var(--primary); color: white; }
+    .prep-custom-row { display: flex; align-items: center; gap: 8px; padding: 0 16px 12px; }
+    .prep-custom-row label { font-size: 13px; color: var(--text-muted); white-space: nowrap; }
+    .prep-custom-row input[type="number"] { width: 54px; padding: 7px 8px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 15px; font-weight: 700; color: var(--primary); text-align: center; background: var(--primary-pale); }
+    .prep-summary { padding: 0 16px 14px; font-size: 13px; color: var(--text-muted); }
+    .prep-summary strong { color: var(--primary); }
+    .prep-section-card { background: var(--card); border-radius: 16px; margin: 0 16px 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .prep-section-title { padding: 14px 16px 4px; font-size: 15px; font-weight: 700; }
+    .prep-section-sub { padding: 0 16px 10px; font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+    .prep-recipe-row { display: flex; align-items: flex-start; padding: 11px 16px; gap: 12px; border-top: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+    .prep-recipe-row:active { background: var(--bg); }
+    .prep-recipe-row.checked { opacity: 0.45; }
+    .prep-recipe-check { width: 22px; height: 22px; min-width: 22px; border-radius: 6px; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; transition: all 0.15s; margin-top: 2px; flex-shrink: 0; }
+    .prep-recipe-row.checked .prep-recipe-check { background: var(--primary); border-color: var(--primary); }
+    .prep-recipe-row.checked .prep-recipe-check::after { content: '✓'; display: block; font-size: 13px; font-weight: 700; color: white; }
+    .prep-recipe-info { flex: 1; }
+    .prep-recipe-name { font-size: 14px; font-weight: 600; line-height: 1.4; color: var(--text); }
+    .prep-recipe-row.checked .prep-recipe-name { text-decoration: line-through; }
+    .prep-recipe-days { font-size: 12px; color: var(--primary); margin-top: 3px; font-weight: 500; }
+    .prep-recipe-storage { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .prep-recipe-note { font-size: 11px; color: var(--accent); margin-top: 2px; font-style: italic; }
+    .prep-note-row { display: flex; align-items: flex-start; padding: 11px 16px; gap: 12px; border-top: 1px solid var(--border); }
+    .prep-cat-block { border-top: 1px solid var(--border); }
+    .prep-cat-header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+    .prep-cat-left { display: flex; align-items: center; gap: 10px; }
+    .prep-cat-icon { font-size: 18px; }
+    .prep-cat-label { font-size: 14px; font-weight: 700; }
+    .prep-cat-count { font-size: 12px; color: var(--text-muted); background: var(--bg); padding: 2px 8px; border-radius: 10px; }
+    .prep-cat-body { display: none; padding: 0 16px 12px; }
+    .prep-cat-block.open .prep-cat-body { display: block; }
+    .prep-tip-box { background: var(--primary-pale); border-radius: 8px; padding: 9px 12px; margin-bottom: 10px; }
+    .prep-tip-text { font-size: 13px; color: var(--primary); font-weight: 500; line-height: 1.4; }
+    .prep-tip-storage { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+    .prep-ingr-list { list-style: none; }
+    .prep-ingr-list li { font-size: 13px; line-height: 1.5; padding: 4px 0 4px 16px; color: var(--text); border-bottom: 1px solid var(--border); position: relative; }
+    .prep-ingr-list li:last-child { border-bottom: none; }
+    .prep-ingr-list li::before { content: '·'; color: var(--accent); font-size: 18px; font-weight: 700; position: absolute; left: 0; top: 2px; line-height: 1.4; }
+    .prep-ingr-context { font-size: 11px; color: var(--text-muted); }
+    .prep-reset-btn { display: block; width: calc(100% - 32px); margin: 4px 16px 16px; padding: 12px; background: #FFEBEE; color: #C62828; border: none; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; }
+
     /* ── INGREDIENTES DEL DÍA ── */
     .ingr-section { padding: 0 16px 8px; border-bottom: 1px solid var(--border); }
     .ingr-section:last-child { border-bottom: none; padding-bottom: 12px; }
@@ -322,6 +367,7 @@
     <div id="compras-content"></div>
     <button class="reset-btn" onclick="resetShopping()">🔄 Reiniciar lista de compras</button>
   </div>
+  <div id="tab-prep" class="tab-content"><div id="prep-content"></div></div>
   <div id="tab-ajustes" class="tab-content">
     <div class="section-label">Plan</div>
     <div class="settings-section">
@@ -355,6 +401,7 @@
   <button class="nav-btn active" id="nav-hoy" onclick="showTab('hoy')"><span class="nav-icon">🌅</span><span class="nav-label">Hoy</span></button>
   <button class="nav-btn" id="nav-plan" onclick="showTab('plan')"><span class="nav-icon">📅</span><span class="nav-label">Plan</span></button>
   <button class="nav-btn" id="nav-compras" onclick="showTab('compras')"><span class="nav-icon">🛒</span><span class="nav-label">Compras</span></button>
+  <button class="nav-btn" id="nav-prep" onclick="showTab('prep')"><span class="nav-icon">🥣</span><span class="nav-label">Prep</span></button>
   <button class="nav-btn" id="nav-ajustes" onclick="showTab('ajustes')"><span class="nav-icon">⚙️</span><span class="nav-label">Ajustes</span></button>
 </nav>
 
@@ -597,9 +644,93 @@ const SHOPPING = [
 ];
 
 // ─────────────────────────────────────────────
+//  DATA: PREP
+// ─────────────────────────────────────────────
+// makeAhead: se puede preparar completamente el sábado y guardar
+// note: consejo para recetas que se hacen el mismo día
+const RECIPE_PREP = {
+  'alino-antioxidante':      { makeAhead: true,  storage: '7 días en frasco de vidrio' },
+  'humus-alcachofas':        { makeAhead: true,  storage: '5 días en nevera' },
+  'coctel-verduras':         { makeAhead: false, note: 'Mejor fresco; corta y lava las verduras hoy' },
+  'revuelto-thai':           { makeAhead: true,  storage: '4 días en nevera' },
+  'almendras-canela':        { makeAhead: true,  storage: '2 semanas en recipiente hermético' },
+  'garbanzos-crujientes':    { makeAhead: true,  storage: '1 semana en recipiente hermético' },
+  'guisado-ternera':         { makeAhead: true,  storage: '4 días en nevera' },
+  'licuado-arandanos':       { makeAhead: false, note: 'Mejor fresco; pre-mezcla los ingredientes secos' },
+  'sopa-frijoles-negros':    { makeAhead: true,  storage: '5 días en nevera' },
+  'salmon-agridulce':        { makeAhead: false, note: 'Cocinar el día; la conserva de cilantro aguanta 3 días' },
+  'arroz-integral-coco':     { makeAhead: true,  storage: '4 días en nevera' },
+  'hamburguesas-pavo':       { makeAhead: true,  storage: 'Patties crudos 2 días / cocidos 4 días en nevera' },
+  'pollo-pesto-nueces':      { makeAhead: true,  storage: '3 días en nevera' },
+  'horneado-quinoa':         { makeAhead: true,  storage: '5 días en nevera' },
+  'ensalada-col-rizada':     { makeAhead: true,  storage: 'Masajear col hoy; añadir aderezos el día' },
+  'curry-camarones':         { makeAhead: false, note: 'Hacer la salsa de curry hoy; agregar camarones el día' },
+  'salsa-frijoles-blancos':  { makeAhead: true,  storage: '5 días en nevera' },
+  'salsa-cremosa-zanahoria': { makeAhead: true,  storage: '4 días en nevera' },
+  'pescado-grill-col':       { makeAhead: false, note: 'Cocinar el día; la ensalada de col se puede preparar hoy (sin aliñar)' },
+  'batido-proteico-hyman':   { makeAhead: false, note: 'Mejor fresco; tuesta las nueces y mide los ingredientes secos hoy' },
+  'ensalada-pescado-hierbas':{ makeAhead: false, note: 'Preparar el día; picar el apio y las hierbas con antelación' },
+  'bol-pollo-primavera':     { makeAhead: true,  storage: '3 días en nevera' },
+  'omelette-brocoli':        { makeAhead: true,  storage: '3 días en nevera' },
+  'bacalao-griego':          { makeAhead: false, note: 'Cocinar el día; el marinado aguanta 1 día en nevera' },
+  'kofta-cordero':           { makeAhead: true,  storage: 'Koftas crudas 2 días / cocidas 3 días en nevera' },
+};
+
+const PREP_CATS = [
+  { id:'granos',    icon:'🍚', label:'Granos y legumbres',  order:1,
+    tip:'Cocínalos ahora y guárdalos — te ahorras 20–40 min cada día.',
+    storage:'Recipiente hermético · nevera hasta 6 días',
+    kwds:['quinoa','arroz','frijol','garbanzo','edamame'] },
+  { id:'proteina',  icon:'🥩', label:'Proteínas',           order:2,
+    tip:'Sazona y guarda crudas (máx. 2 días) o cocina completamente y refrigera.',
+    storage:'Nevera · 3–4 días cocida',
+    kwds:['pavo','pollo','ternera','cordero','salmon','bacalao','halibut','pescado','camaron','tempe','atun'] },
+  { id:'verduras',  icon:'🔪', label:'Verduras a cortar',   order:3,
+    tip:'Lavar, pelar y cortar tal como pide la receta. Guardar en recipiente con agua fría.',
+    storage:'Nevera · 5–7 días',
+    kwds:['zanahoria','remolacha','patata','name','apio','jicama','calabacin','pepino','pimiento','esparrago','guisante','brocoli','coliflor','cebolla','col rizada','col verde','col morada','col'] },
+  { id:'hojas',     icon:'🥬', label:'Hojas y lechugas',    order:4,
+    tip:'Lavar, secar muy bien y guardar envueltas en papel absorbente dentro de un recipiente.',
+    storage:'Nevera · 3–5 días',
+    kwds:['espinaca','lechuga','berza','kale'] },
+  { id:'hierbas',   icon:'🌿', label:'Hierbas frescas',     order:5,
+    tip:'Lavar y secar. Enrollar en papel absorbente o poner los tallos en un vaso con agua.',
+    storage:'Nevera · 5–7 días',
+    kwds:['cilantro','perejil','albahaca','menta','eneldo'] },
+  { id:'aromaticos',icon:'🧄', label:'Ajo y jengibre',      order:6,
+    tip:'Pelar y machacar/picar con antelación. Guardar en frasquitos herméticos.',
+    storage:'Nevera · 5–7 días',
+    kwds:['ajo','jengibre'] },
+  { id:'citricos',  icon:'🍋', label:'Cítricos',            order:7,
+    tip:'Exprimir el jugo y rallar la cáscara ahora. Guardar en frasco de vidrio.',
+    storage:'Nevera · 5–7 días',
+    kwds:['limon','lima'] },
+  { id:'frutos',    icon:'🌰', label:'Frutos secos',        order:8,
+    tip:'Tostar en horno a 180°C por 8–10 min. Enfriar y guardar en recipiente hermético.',
+    storage:'Temperatura ambiente · hasta 2 semanas',
+    kwds:['almendra','nuez','nueces','pinon','semilla','linaza','canamo','coco rallado'] },
+  { id:'otros',     icon:'📦', label:'Otros ingredientes',  order:9,
+    tip:'Verificar que tienes todo en despensa. Abrir latas y medir cantidades secas de antemano.',
+    storage:'Variable según el ingrediente',
+    kwds:[] },
+];
+
+function normStr(s) {
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+}
+function getCatForIngr(text) {
+  const n = normStr(text);
+  for (const cat of PREP_CATS) {
+    if (cat.id === 'otros') continue;
+    if (cat.kwds.some(kw => n.includes(kw))) return cat;
+  }
+  return PREP_CATS.find(c => c.id === 'otros');
+}
+
+// ─────────────────────────────────────────────
 //  STATE
 // ─────────────────────────────────────────────
-let state = { startDate: null, checked: {}, shopFilter: 'all', notifTimes: { desayuno:'08:00', aperitivo:'10:30', almuerzo:'13:00', merienda:'16:00', cena:'19:30' } };
+let state = { startDate: null, checked: {}, shopFilter: 'all', prepFrom: 1, prepTo: 5, prepChecked: {}, notifTimes: { desayuno:'08:00', aperitivo:'10:30', almuerzo:'13:00', merienda:'16:00', cena:'19:30' } };
 
 function loadState() { try { const s = localStorage.getItem('planDaniel'); if (s) state = {...state, ...JSON.parse(s)}; } catch(e){} }
 function saveState() { try { localStorage.setItem('planDaniel', JSON.stringify(state)); } catch(e){} }
@@ -834,6 +965,7 @@ function showTab(tab) {
   if (tab === 'hoy')     renderHoy();
   if (tab === 'plan')    renderPlan();
   if (tab === 'compras') renderCompras();
+  if (tab === 'prep')    renderPrep();
   if (tab === 'ajustes') renderAjustes();
 }
 
@@ -877,6 +1009,186 @@ function showToast(msg) {
 }
 
 // ─────────────────────────────────────────────
+//  RENDER: PREP
+// ─────────────────────────────────────────────
+function renderPrep() {
+  const from = state.prepFrom || 1;
+  const to   = state.prepTo   || 5;
+
+  // Collect all recipe IDs used in the selected range
+  const recipeUsage = {}; // recipeId -> [day numbers]
+  for (let d = from; d <= to; d++) {
+    for (const key of Object.keys(MEAL_LABELS)) {
+      const rid = PLAN_RECIPES[`${d}_${key}`];
+      if (!rid) continue;
+      if (!recipeUsage[rid]) recipeUsage[rid] = [];
+      if (!recipeUsage[rid].includes(d)) recipeUsage[rid].push(d);
+    }
+  }
+
+  const allRids     = Object.keys(recipeUsage);
+  const makeAhead   = allRids.filter(id => RECIPE_PREP[id]?.makeAhead);
+  const makeDay     = allRids.filter(id => RECIPE_PREP[id] && !RECIPE_PREP[id].makeAhead);
+
+  // Gather ingredients from make-day recipes (the ones NOT made ahead) organized by category
+  const byCat = {};
+  for (const rid of makeDay) {
+    const recipe = RECIPES[rid];
+    if (!recipe) continue;
+    for (const ingr of recipe.ingredientes) {
+      const cat = getCatForIngr(ingr);
+      if (!byCat[cat.id]) byCat[cat.id] = { ...cat, items: [] };
+      byCat[cat.id].items.push({ text: ingr, recipe: recipe.name });
+    }
+  }
+
+  const totalRecipes = allRids.length;
+  const totalIngr    = Object.values(byCat).reduce((s, c) => s + c.items.length, 0);
+
+  // Presets
+  const presets = [
+    { label:'Días 1–3', from:1, to:3 },
+    { label:'Días 1–5', from:1, to:5 },
+    { label:'Días 6–10', from:6, to:10 },
+    { label:'Todos',    from:1, to:10 },
+  ];
+  const presetsHtml = presets.map(p => {
+    const act = (from === p.from && to === p.to) ? 'active' : '';
+    return `<button class="prep-preset ${act}" onclick="setPrepRange(${p.from},${p.to})">${p.label}</button>`;
+  }).join('');
+
+  // Make-ahead rows
+  let makeAheadHtml = '';
+  for (const rid of makeAhead) {
+    const recipe = RECIPES[rid]; if (!recipe) continue;
+    const info  = RECIPE_PREP[rid];
+    const days  = recipeUsage[rid];
+    const dlbl  = 'Día' + (days.length > 1 ? 's ' : ' ') + days.join(', ');
+    const ck    = state.prepChecked?.[`r:${rid}`];
+    makeAheadHtml += `<div class="prep-recipe-row ${ck ? 'checked' : ''}" onclick="togglePrepCheck('r:${rid}')">
+      <div class="prep-recipe-check"></div>
+      <div class="prep-recipe-info">
+        <div class="prep-recipe-name">${recipe.name}</div>
+        <div class="prep-recipe-days">${dlbl}</div>
+        <div class="prep-recipe-storage">🧊 ${info.storage}</div>
+      </div></div>`;
+  }
+
+  // Make-day notes
+  let makeDayHtml = '';
+  for (const rid of makeDay) {
+    const recipe = RECIPES[rid]; if (!recipe) continue;
+    const info   = RECIPE_PREP[rid];
+    const days   = recipeUsage[rid];
+    const dlbl   = 'Día' + (days.length > 1 ? 's ' : ' ') + days.join(', ');
+    makeDayHtml += `<div class="prep-note-row">
+      <div class="prep-recipe-info">
+        <div class="prep-recipe-name">${recipe.name}</div>
+        <div class="prep-recipe-days">${dlbl}</div>
+        <div class="prep-recipe-note">💡 ${info.note}</div>
+      </div></div>`;
+  }
+
+  // Ingredient categories
+  const sortedCats = Object.values(byCat).sort((a, b) => a.order - b.order);
+  let catsHtml = '';
+  for (const cat of sortedCats) {
+    const liItems = cat.items.map(i =>
+      `<li>${i.text} <span class="prep-ingr-context">(${i.recipe})</span></li>`
+    ).join('');
+    catsHtml += `<div class="prep-cat-block" id="prepcat-${cat.id}">
+      <div class="prep-cat-header" onclick="togglePrepCat('${cat.id}')">
+        <div class="prep-cat-left">
+          <span class="prep-cat-icon">${cat.icon}</span>
+          <span class="prep-cat-label">${cat.label}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="prep-cat-count">${cat.items.length}</div>
+          <div class="day-arrow">›</div>
+        </div>
+      </div>
+      <div class="prep-cat-body">
+        <div class="prep-tip-box">
+          <div class="prep-tip-text">💡 ${cat.tip}</div>
+          <div class="prep-tip-storage">🧊 ${cat.storage}</div>
+        </div>
+        <ul class="prep-ingr-list">${liItems}</ul>
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('prep-content').innerHTML = `
+    <div class="section-label">Sesión de Preparación</div>
+
+    <div class="prep-range-card">
+      <div class="prep-range-header">¿Para cuántos días preparar?</div>
+      <div class="prep-presets">${presetsHtml}</div>
+      <div class="prep-custom-row">
+        <label>Del día</label>
+        <input type="number" id="prep-from" min="1" max="10" value="${from}"
+               onchange="setPrepRange(this.value, document.getElementById('prep-to').value)">
+        <label>al día</label>
+        <input type="number" id="prep-to" min="1" max="10" value="${to}"
+               onchange="setPrepRange(document.getElementById('prep-from').value, this.value)">
+      </div>
+      <div class="prep-summary">Cubre <strong>${totalRecipes} recetas</strong> · ${makeAhead.length} para preparar completas · ${totalIngr} ingredientes a pre-procesar</div>
+    </div>
+
+    ${makeAheadHtml ? `
+    <div class="prep-section-card">
+      <div class="prep-section-title">✅ Prepara estas recetas completas hoy</div>
+      <div class="prep-section-sub">Hazlas ahora y guárdalas. Marca las que vayas terminando.</div>
+      ${makeAheadHtml}
+    </div>` : ''}
+
+    ${makeDayHtml ? `
+    <div class="prep-section-card">
+      <div class="prep-section-title">📅 Estas se hacen el mismo día</div>
+      <div class="prep-section-sub">Mejor frescas, pero puedes adelantar parte de su preparación.</div>
+      ${makeDayHtml}
+    </div>` : ''}
+
+    ${catsHtml ? `
+    <div class="prep-section-card">
+      <div class="prep-section-title">🔪 Ingredientes a pre-procesar</div>
+      <div class="prep-section-sub">Deja estos listos hoy para las recetas del mismo día.</div>
+      ${catsHtml}
+    </div>` : ''}
+
+    <button class="prep-reset-btn" onclick="resetPrepChecks()">🔄 Reiniciar sesión de prep</button>
+  `;
+}
+
+function setPrepRange(from, to) {
+  from = Math.max(1, Math.min(10, parseInt(from) || 1));
+  to   = Math.max(from, Math.min(10, parseInt(to) || from));
+  state.prepFrom = from;
+  state.prepTo   = to;
+  saveState();
+  renderPrep();
+}
+
+function togglePrepCheck(key) {
+  if (!state.prepChecked) state.prepChecked = {};
+  state.prepChecked[key] = !state.prepChecked[key];
+  saveState();
+  renderPrep();
+}
+
+function togglePrepCat(id) {
+  const el = document.getElementById('prepcat-' + id);
+  if (el) el.classList.toggle('open');
+}
+
+function resetPrepChecks() {
+  if (!confirm('¿Reiniciar la sesión de preparación?')) return;
+  state.prepChecked = {};
+  saveState();
+  renderPrep();
+  showToast('Sesión reiniciada');
+}
+
+// ─────────────────────────────────────────────
 //  INGREDIENTES DEL DÍA
 // ─────────────────────────────────────────────
 function getIngredientesDelDia(day) {
@@ -900,7 +1212,7 @@ function getIngredientesDelDia(day) {
 // ─────────────────────────────────────────────
 function init() {
   shopFilter = state.shopFilter || 'all';
-  renderHoy(); renderPlan(); renderCompras(); renderAjustes(); updateHeader();
+  renderHoy(); renderPlan(); renderCompras(); renderPrep(); renderAjustes(); updateHeader();
   scheduleNotifCheck();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
